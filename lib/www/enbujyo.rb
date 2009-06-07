@@ -7,8 +7,6 @@ require 'tempfile'
 require 'fileutils'
 require 'nkf'
 
-require 'www/enbujyo/player'
-
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
 #
