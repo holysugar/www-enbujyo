@@ -1,11 +1,13 @@
 require 'test_helper'
+require 'yaml'
 
 class WwwEnbujyoTest < Test::Unit::TestCase
   context "WWW::Enbujyo instance" do
     setup do
+      param = YAML.load_file("#{ENV['HOME']}/.enbujyorc")
       @agent = WWW::Enbujyo.new(
-        :mail => 'XXX',
-        :password => 'XXX'
+        :mail => param['mail'],
+        :password => param['password']
       )
     end
 
@@ -19,9 +21,9 @@ class WwwEnbujyoTest < Test::Unit::TestCase
       should "return valid player hashdata" do
         @agent.login
         player = @agent.player_user
-        assert player[:name]
-        assert player[:class]
-        assert player[:games]
+        puts player.description
+        assert player.name
+        assert player.pclass
       end
     end
   end

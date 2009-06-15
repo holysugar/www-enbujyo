@@ -7,6 +7,8 @@ require 'tempfile'
 require 'fileutils'
 require 'nkf'
 
+require 'www/enbujyo/player'
+
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
 #
@@ -51,15 +53,15 @@ module WWW
       player = {}
 
       div1 = page_loaded_agent.page.search('div.st_block_info3')[0]
-      player[:username_url] = div1.search('img')[0]['src']
+      player[:name_image_url] = div1.search('img')[0]['src']
       player[:name] = div1.text.scan(/\b君主名:(.*)\s/)[0][0]
       player[:accesscode] = div1.text.scan(/\bACCESS CODE:(\d+)\s/)[0][0]
 
       div2 = page_loaded_agent.page.search('div.st_block_info3_body')[0]
-      player[:class] = div2.text.scan(/\b称号:(.*)\s/)[0][0]
+      player[:title] = div2.text.scan(/\b称号:(.*)\s/)[0][0]
       player[:akashi] = div2.text.scan(/\b証:(.*)\s/)[0][0] rescue nil
       player[:buyuu] = div2.text.scan(/\b武勇:(.*)\s/)[0][0] rescue nil
-      player[:seibou] = div2.text.scan(/\b声望値:(.*)\s/)[0][0] rescue nil
+      player[:seibou] = div2.text.scan(/\b声望値:(.*%)\s/)[0][0] rescue nil
 
       div3 = page_loaded_agent.page.search('div.st_block_info3_body')[1]
       /全(\d+)戦(\d+)勝\s*(\d+)敗\s*(\d+)分.*連勝数:(\d+)連勝\s*最高連勝数:(\d+)連勝\s*最新10戦:(.+)\s*全国順位:(\d+)位/m =~ div3.text
@@ -72,7 +74,7 @@ module WWW
       player[:ten_games] = $7
       player[:rank] = $8.to_i
 
-      player
+      Player.new(player)
     end
 
     def download_selection(movie_type = 's')
