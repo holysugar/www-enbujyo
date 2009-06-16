@@ -6,8 +6,12 @@ require 'logger'
 require 'tempfile'
 require 'fileutils'
 require 'nkf'
+require 'json'
 
 require 'www/enbujyo/player'
+require 'www/enbujyo/deck'
+require 'www/enbujyo/location'
+require 'www/enbujyo/game'
 
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
@@ -41,7 +45,7 @@ module WWW
       true
     end
 
-    def player_user(reload = false)
+    def get_player_user(reload = false)
       if reload or not @player_user
         auth_get(@agent, 'http://enbujyo.3594t.com/members/player/index.html')
         @player_user = get_player_data(@agent)
@@ -53,28 +57,81 @@ module WWW
       player = {}
 
       div1 = page_loaded_agent.page.search('div.st_block_info3')[0]
+      div1text = div1.text
       player[:name_image_url] = div1.search('img')[0]['src']
-      player[:name] = div1.text.scan(/\b君主名:(.*)\s/)[0][0]
-      player[:accesscode] = div1.text.scan(/\bACCESS CODE:(\d+)\s/)[0][0]
+      player[:name] = div1text.scan(/\b君主名:(.*)\s/)[0][0]
+      player[:accesscode] = div1text.scan(/\bACCESS CODE:(\d+)\s/)[0][0]
 
       div2 = page_loaded_agent.page.search('div.st_block_info3_body')[0]
-      player[:title] = div2.text.scan(/\b称号:(.*)\s/)[0][0]
-      player[:akashi] = div2.text.scan(/\b証:(.*)\s/)[0][0] rescue nil
-      player[:buyuu] = div2.text.scan(/\b武勇:(.*)\s/)[0][0] rescue nil
-      player[:seibou] = div2.text.scan(/\b声望値:(.*%)\s/)[0][0] rescue nil
+      div2text = div2.text
+      player[:title] = div2text.scan(/\b称号:(.*)\s/)[0][0]
+      player[:brave_desc], player[:brave] = div2text.scan(/\b(証|武勇):(.*)\s/)[0]
+      player[:seibou] = div2text.scan(/\b声望値:(.*%)\s/)[0][0] rescue nil
 
       div3 = page_loaded_agent.page.search('div.st_block_info3_body')[1]
-      /全(\d+)戦(\d+)勝\s*(\d+)敗\s*(\d+)分.*連勝数:(\d+)連勝\s*最高連勝数:(\d+)連勝\s*最新10戦:(.+)\s*全国順位:(\d+)位/m =~ div3.text
-      player[:games] = $1.to_i
-      player[:wins] = $2.to_i
-      player[:loses] = $3.to_i
-      player[:draws] = $4.to_i
-      player[:consecutive_wins] = $5.to_i
-      player[:max_consecutive_wins] = $6.to_i
-      player[:ten_games] = $7
-      player[:rank] = $8.to_i
+      div3text = div3.text
+      #/全(\d+)戦(\d+)勝\s*(\d+)敗\s*(\d+)分.*連勝数:(\d+)連勝\s*最高連勝数:(\d+)連勝\s*最新10戦:(.+)\s*全国順位:(\d+)位/m =~ div3.text
+      
+      player[:games] = div3text.scan(/全(\d+)戦/)[0][0].to_i rescue nil
+      player[:wins] = div3text.scan(/(\d+)勝/)[0][0].to_i rescue nil
+      player[:loses] = div3text.scan(/(\d+)敗/)[0][0].to_i rescue nil
+      player[:draws] = div3text.scan(/(\d+)分/)[0][0].to_i rescue nil
+      player[:rate] = div3text.scan(/勝率:([\d\.]+)%/)[0][0] rescue nil
+      player[:consecutive_wins] = div3text.scan(/連勝数:(\d+)連勝/)[0][0].to_i rescue nil
+      player[:max_consecutive_wins] = div3text.scan(/最高連勝数:(\d+)連勝/)[0][0].to_i rescue nil 
+      player[:ten_games] = div3text.scan(/最新10戦:(.+)/)[0][0] rescue nil
+      player[:rank] = div3text.scan(/全国順位:(\d+)位/)[0][0].to_i rescue nil
 
       Player.new(player)
+    end
+
+    def get_selection_info
+      @agent.post('http://enbujyo.3594t.com/members/selection/selection.cgi', {
+        'mode' => 'latest',
+        'version' => 1
+      })
+      json = hack_json(@agent.page.body)
+      obj = JSON.parse(json)
+      rep = obj['replay'][0]
+
+      p0, p0deck, p0loc = get_selection_info_build('p0', rep)
+      p1, p1deck, p1loc = get_selection_info_build('p1', rep)
+
+      game = WWW::Enbujyo::Game.new(p0, p0deck, p0loc, p1, p1deck, p1loc, rep)
+      game
+    end
+
+    def get_selection_info_build(prefix, rep)
+      deck = Deck.new
+      rep.keys.grep(/#{prefix}card_params_\d/).sort.each{|k|
+        deck.cards.push WWW::Enbujyo::Card.parse_from_jsonstr(rep[k])
+      }
+      deck.gcards.push(WWW::Enbujyo::Gunshi.new(
+        :image => rep[prefix+'staff_image'],
+        :level => rep[prefix+'staff_level'],
+        :longname => rep[prefix+'staff_name'],
+        :team => rep[prefix+'staff_seiryoku_name'],
+        :attribute => rep[prefix+'staff_zokusei_name'],
+        :strategy => rep[prefix+'strategy_name'],
+        :ex => rep[prefix+'skill_ex_name']
+      ))
+      player = WWW::Enbujyo::Player.new(
+        :name => rep[prefix+'name'],
+        :name_image_url => rep[prefix+'image'],
+        :team => rep[prefix+'team_name'],
+        :title => rep[prefix+'grade_name'],
+        :brave => rep[prefix+'brave'],
+        :brave_desc => rep[prefix+'brave_desc'],
+        :rank => rep[prefix+'rank'],
+        :wins => rep[prefix+'win'],
+        :loses => rep[prefix+'lose'],
+        :rate => rep[prefix+'win_rate']
+      )
+      location = WWW::Enbujyo::Location.new(
+        :pref => rep[prefix+'pref_name'],
+        :office => rep[prefix+'office']
+      )
+      return [player, deck, location]
     end
 
     def download_selection(movie_type = 's')
@@ -121,6 +178,10 @@ module WWW
         end
       end
       ret
+    end
+
+    def hack_json(jsonstr)
+      jsonstr.sub(/^\w+=/,'').gsub(/\},.*\]/m, '}]')
     end
 
   end

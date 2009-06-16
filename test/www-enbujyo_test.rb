@@ -20,10 +20,22 @@ class WwwEnbujyoTest < Test::Unit::TestCase
     context "player_user method" do
       should "return valid player hashdata" do
         @agent.login
-        player = @agent.player_user
-        puts player.description
+        player = @agent.get_player_user
         assert player.name
-        assert player.pclass
+        assert player.title
+      end
+    end
+
+    context "get_selection_info method" do
+      should "return valid game data" do
+        @agent.login
+        game = @agent.get_selection_info
+        assert game.player0.is_a? WWW::Enbujyo::Player
+        assert game.player1.is_a? WWW::Enbujyo::Player
+        assert game.deck0.is_a? WWW::Enbujyo::Deck
+        assert game.deck1.is_a? WWW::Enbujyo::Deck
+        assert game.location0.is_a? WWW::Enbujyo::Location
+        assert game.location1.is_a? WWW::Enbujyo::Location
       end
     end
   end

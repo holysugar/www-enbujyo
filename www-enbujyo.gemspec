@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{www-enbujyo}
-  s.version = "0.1.4"
+  s.version = "0.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["holysugar"]
@@ -10,23 +10,23 @@ Gem::Specification.new do |s|
   s.email = %q{holysugar@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README",
-     "README.rdoc"
+    "README.mkdn"
   ]
   s.files = [
     ".gitignore",
-     "LICENSE",
-     "README",
-     "README.rdoc",
-     "Rakefile",
-     "VERSION",
-     "lib/enbujyo.rb",
-     "lib/www/enbujyo.rb",
-     "lib/www/enbujyo/player.rb",
-     "lib/www/enbujyo/util.rb",
-     "test/test_helper.rb",
-     "test/www-enbujyo_test.rb",
-     "www-enbujyo.gemspec"
+    "LICENSE",
+    "Rakefile",
+    "VERSION",
+    "lib/enbujyo.rb",
+    "lib/www/enbujyo.rb",
+    "lib/www/enbujyo/player.rb",
+    "lib/www/enbujyo/game.rb",
+    "lib/www/enbujyo/deck.rb",
+    "lib/www/enbujyo/location.rb",
+    "lib/www/enbujyo/util.rb",
+    "test/test_helper.rb",
+    "test/www-enbujyo_test.rb",
+    "www-enbujyo.gemspec"
   ]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/holysugar/www-enbujyo}
@@ -34,10 +34,11 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{www-enbujyo}
   s.rubygems_version = %q{1.3.1}
-  s.summary = %q{TODO}
+  s.summary = %q{Sangokushi Taisen Enbujyo (http://enbujyo.3594t.com/) access library}
+  s.description = %q{Sangokushi Taisen Enbujyo (http://enbujyo.3594t.com/) access library using WWW::Mechanize.}
   s.test_files = [
     "test/test_helper.rb",
-     "test/www-enbujyo_test.rb"
+    "test/www-enbujyo_test.rb"
   ]
 
   if s.respond_to? :specification_version then
