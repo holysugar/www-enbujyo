@@ -106,15 +106,19 @@ module WWW
       rep.keys.grep(/#{prefix}card_params_\d/).sort.each{|k|
         deck.cards.push WWW::Enbujyo::Card.parse_from_jsonstr(rep[k])
       }
-      deck.gcards.push(WWW::Enbujyo::Gunshi.new(
-        :image => rep[prefix+'staff_image'],
-        :level => rep[prefix+'staff_level'],
-        :longname => rep[prefix+'staff_name'],
-        :team => rep[prefix+'staff_seiryoku_name'],
-        :attribute => rep[prefix+'staff_zokusei_name'],
-        :strategy => rep[prefix+'strategy_name'],
-        :ex => rep[prefix+'skill_ex_name']
-      ))
+      %w|0 1|.each do |num|
+        next unless rep[prefix+'staff_image_'+num]
+
+        deck.gcards.push(WWW::Enbujyo::Gunshi.new(
+          :image => rep[prefix+'staff_image_'+num],
+          :level => rep[prefix+'staff_level_'+num],
+          :longname => rep[prefix+'staff_name_'+num],
+          :team => rep[prefix+'staff_seiryoku_name_'+num],
+          :attribute => rep[prefix+'staff_zokusei_name'],
+          :strategy => rep[prefix+'strategy_name'],
+          :ex => rep[prefix+'skill_ex_name']
+        ))
+      end
       player = WWW::Enbujyo::Player.new(
         :name => rep[prefix+'name'],
         :name_image_url => rep[prefix+'image'],
@@ -149,6 +153,7 @@ module WWW
       end
       FileUtils.mv(tmpname, filename)
       puts "Downloading #{filename} has finished." unless silent?
+      filename
     end
 
     private
