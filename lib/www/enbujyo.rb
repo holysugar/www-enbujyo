@@ -7,17 +7,22 @@ require 'tempfile'
 require 'fileutils'
 require 'nkf'
 require 'json'
+require 'uri'
 
+require 'www/enbujyo/helper'
 require 'www/enbujyo/player'
 require 'www/enbujyo/deck'
 require 'www/enbujyo/location'
 require 'www/enbujyo/game'
+require 'www/enbujyo/my_movie'
 
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
 #
 module WWW
   class Enbujyo
+    include Utils
+
     attr_accessor :mail, :password
     attr_reader :agent
 
@@ -31,6 +36,8 @@ module WWW
       unless @agent
         @agent = WWW::Mechanize.new
         @agent.user_agent_alias = 'Windows Mozilla'
+        @agent.extend ExtendedAgent
+        @agent.autologin = @options['autologin']
       end
     end
 
@@ -47,7 +54,7 @@ module WWW
 
     def get_player_user(reload = false)
       if reload or not @player_user
-        auth_get(@agent, 'http://enbujyo.3594t.com/members/player/index.html')
+        @agent.auth_get 'http://enbujyo.3594t.com/members/player/index.html'
         @player_user = get_player_data(@agent)
       end
       @player_user
@@ -140,53 +147,17 @@ module WWW
 
     def download_selection(movie_type = 's')
       movie_date = (Time.now - 60*60*17).strftime("%Y%m%d")  # 17時で切り替え/JST前提
-      auth_get(@agent, 'http://enbujyo.3594t.com/members/selection/index.html')
+      @agent.auth_get 'http://enbujyo.3594t.com/members/selection/index.html'
 
-      tmpname = "_enbujyo_download.#{random_string}.wmv"
-      open(tmpname, 'w'){|tmp|
-        tmp.print @agent.get_file("http://download.enbujyo.3594t.com/selection_download.cgi?date=#{movie_date}&type=#{movie_type}")
-      }
-      filename = "selection_#{movie_date}.wmv"
-      if @agent.page.response['content-disposition']
-        /filename="(.*\.wmv)"/ =~ @agent.page.response['content-disposition']
-        filename = windows? ? $1 : NKF.nkf('-Sw', $1)
-      end
-      FileUtils.mv(tmpname, filename)
-      puts "Downloading #{filename} has finished." unless silent?
-      filename
+      download_movie(@agent, "http://download.enbujyo.3594t.com/selection_download.cgi?date=#{movie_date}&type=#{movie_type}")
     end
 
-    private
-    def random_string(length = 10, strings = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-      Array.new(length).map{ strings[rand(strings.size),1] }.join
-    end
-
-    def windows?
-      RUBY_PLATFORM.downcase =~ /mswin(?!ce)|mingw|cygwin|bccwin/
+    def my_movies
+      m = WWW::Enbujyo::MyMovie.new(@agent)
+      m.parse
     end
 
     def silent?
-      @options[:silent]
-    end
-
-    def auto_relogin?
-      @options[:auto_relogin]
-    end
-
-    def auth_get(agent, url)
-      ret = agent.get(url)
-      if /error/i =~ agent.page.uri.to_s or /エラー/ =~ agent.page.title 
-        if auto_relogin?
-          login
-        else
-          raise LoginError
-        end
-      end
-      ret
-    end
-
-    def hack_json(jsonstr)
-      jsonstr.sub(/^\w+=/,'').gsub(/\},.*\]/m, '}]')
     end
 
   end
