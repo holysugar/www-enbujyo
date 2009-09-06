@@ -19,7 +19,6 @@ module WWW
           info = {}
           info[:title] = div.search('div.st_movie_info_desc_battle_vs').text
           date = div.search('div.st_movie_info_desc_battle_date span')
-          p date
           info[:date] = Time.parse(date[0].text)
           info[:result] = date[1].text
           info[:movie] = div.search('div.st_movie_info_desc_movie').text
