@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{www-enbujyo}
-  s.version = "0.1.9"
+  s.version = "0.1.10"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["holysugar"]
-  s.date = %q{2009-09-06}
+  s.date = %q{2009-09-07}
   s.email = %q{holysugar@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
