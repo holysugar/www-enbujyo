@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{www-enbujyo}
-  s.version = "0.1.8"
+  s.version = "0.1.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["holysugar"]
@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
      "lib/www/enbujyo/movie.rb",
      "lib/www/enbujyo/my_movie.rb",
      "lib/www/enbujyo/player.rb",
-     "lib/www/enbujyo/util.rb",
      "test/test_helper.rb",
      "test/www-enbujyo_test.rb",
      "www-enbujyo.gemspec"
