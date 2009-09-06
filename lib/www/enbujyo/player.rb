@@ -1,4 +1,3 @@
-require 'www/enbujyo/util'
 
 module WWW
   class Enbujyo

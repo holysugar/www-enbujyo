@@ -16,8 +16,12 @@ module WWW
       attr_reader :download_limit, :download_left
       attr_reader :thumbnail
       attr_reader :url, :delete_url
+      attr_reader :id
+      attr_reader :game
 
-      def initialize(info, max_download = 5)
+      def initialize(info, game, max_download = 5)
+        @game = game
+
         @title = info[:title] or warn 'Movie: title not found'
         @date = info[:date] or warn 'Movie: date not found'
         @result = info[:result]
@@ -49,7 +53,8 @@ module WWW
         @download_left = info[:download_left]
         @thumbnails = info[:thumbnails]
 
-        @url = info[:url] || info[:purchase_url]
+        @url = info[:url] || info[:purchase_url] 
+        @id = @url.scan(/u=(.*)/).to_s if @url
         @delete_url = info[:delete_url]
       end
 

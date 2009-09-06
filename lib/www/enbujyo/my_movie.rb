@@ -1,3 +1,4 @@
+require 'www/enbujyo/game'
 require 'www/enbujyo/movie'
 require 'activesupport'
 
@@ -39,20 +40,24 @@ module WWW
               info[:download_left] = $1.to_i
             end
           end
+
+          id = div.search('*/@u')[0].to_s
+
           if thumbnail = div.search('div.st_movie_info_thumbnail_mini_all')
             info[:thumbnails] = thumbnail.search('a/@href').collect(&:to_s)
           end
           if download = div.search('span.st_reserve_menu_download_l a/@href')[0]
-            info[:url] = page.uri + download.to_s unless download.to_s.blank?
+            info[:url] = (page.uri + download.to_s).to_s unless download.to_s.blank?
           end
           if purchase_url = div.search('span.st_reserve_menu_purchase_l a/@href')[0]
-            info[:purchase_url] = page.uri + purchase_url.to_s
+            info[:purchase_url] = (page.uri + purchase_url.to_s).to_s
           end
           if delete_url = div.search('span.st_reserve_menu_delete_l a/@href')[0]
             info[:delete_url] = page.uri + delete_url.to_s
           end
 
-          Movie.new(info)
+          game = Game.parse_replay(@agent, id)
+          Movie.new(info, game)
         end
         movies_info
       end
