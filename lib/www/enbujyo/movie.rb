@@ -19,7 +19,9 @@ module WWW
       attr_reader :id
       attr_reader :game
 
-      def initialize(info, game, max_download = 5)
+      def initialize(agent, info, game, max_download = 5)
+        @agent = agent
+
         @game = game
 
         @title = info[:title] or warn 'Movie: title not found'
@@ -58,16 +60,16 @@ module WWW
         @delete_url = info[:delete_url]
       end
 
-      def download(agent)
+      def download
         unless @url
           warn "Can't download this movie yet."
           return false
         end
         case @status
         when :completed
-          download_completed(agent, @url)
+          download_completed(@url)
         when :downloaded
-          download_downloaded(agent, @url)
+          download_downloaded(@url)
         else
           warn "Can't download this movie."
           return false
@@ -79,23 +81,23 @@ module WWW
       end
 
       private
-      def download_completed(agent, url)
-        page = agent.auth_get url
+      def download_completed(url)
+        page = @agent.auth_get url
         # XXX: 動画券がないときの処理.
         link = page.links.find{|l| /download-ok\.html/ =~ l.href }
         if link
-          download_downloaded(agent, page.uri + link.href)
+          download_downloaded(page.uri + link.href)
         else
           warn "Download link is not found in #{page.uri}"
           false
         end
       end
 
-      def download_downloaded(agent, url)
-        page = agent.auth_get url
+      def download_downloaded(url)
+        page = @agent.auth_get url
         link = page.links.find{|l| /download.cgi/ =~ l.href }
         if link
-          download_movie(agent, page.uri + link.href)
+          download_movie(@agent, page.uri + link.href)
         else
           warn "Download link is not found in #{page.uri}"
           false

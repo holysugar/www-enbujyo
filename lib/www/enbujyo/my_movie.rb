@@ -26,15 +26,15 @@ module WWW
 
           div.search('div.st_movie_info_datetime_date').each do |d|
             case d.text
-            when /完成日時: (20.*?)/
+            when /完成日時: (20\d\d-\d\d-\d\d \d\d:\d\d:\d\d)/
               info[:encoded_at] = Time.parse($1)
             when /完成日時: \[(.*?)\]/
               info[:encode_status] = $1
-            when /発注日時: (20.*?)/
+            when /発注日時: (20\d\d-\d\d-\d\d \d\d:\d\d:\d\d)/
               info[:requested_at] = Time.parse($1)
-            when /購入日時: (20.*?)/
+            when /購入日時: (20\d\d-\d\d-\d\d \d\d:\d\d:\d\d)/
               info[:bought_at] = Time.parse($1)
-            when /ダウンロード期限: (20.*?)/
+            when /ダウンロード期限: (20\d\d-\d\d-\d\d \d\d:\d\d:\d\d)/
               info[:download_limit] = Time.parse($1)
             when /残りダウンロード回数: (\d+)回/
               info[:download_left] = $1.to_i
@@ -57,7 +57,7 @@ module WWW
           end
 
           game = Game.parse_replay(@agent, id)
-          Movie.new(info, game)
+          Movie.new(@agent, info, game)
         end
         movies_info
       end
