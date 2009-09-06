@@ -38,6 +38,15 @@ class WwwEnbujyoTest < Test::Unit::TestCase
         assert game.location1.is_a? WWW::Enbujyo::Location
       end
     end
+
+    context "my_movies method" do
+      should "return my movie information list" do
+        @agent.login
+        movies = @agent.my_movies
+        assert movies.length >= 5
+      end
+    end
+
   end
 end
 
