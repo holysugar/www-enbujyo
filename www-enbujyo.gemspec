@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{www-enbujyo}
-  s.version = "0.1.7"
+  s.version = "0.1.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["holysugar"]
-  s.date = %q{2009-08-28}
+  s.date = %q{2009-09-06}
   s.email = %q{holysugar@gmail.com}
   s.extra_rdoc_files = [
     "LICENSE",
@@ -22,7 +22,10 @@ Gem::Specification.new do |s|
      "lib/www/enbujyo.rb",
      "lib/www/enbujyo/deck.rb",
      "lib/www/enbujyo/game.rb",
+     "lib/www/enbujyo/helper.rb",
      "lib/www/enbujyo/location.rb",
+     "lib/www/enbujyo/movie.rb",
+     "lib/www/enbujyo/my_movie.rb",
      "lib/www/enbujyo/player.rb",
      "lib/www/enbujyo/util.rb",
      "test/test_helper.rb",
