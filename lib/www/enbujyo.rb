@@ -15,6 +15,7 @@ require 'www/enbujyo/deck'
 require 'www/enbujyo/location'
 require 'www/enbujyo/game'
 require 'www/enbujyo/my_movie'
+require 'www/enbujyo/team_movie'
 
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
@@ -109,6 +110,11 @@ module WWW
 
     def my_movies
       m = WWW::Enbujyo::MyMovie.new(@agent)
+      m.parse
+    end
+
+    def team_movies
+      m = WWW::Enbujyo::TeamMovie.new(@agent)
       m.parse
     end
 

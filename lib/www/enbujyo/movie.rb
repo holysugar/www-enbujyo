@@ -18,6 +18,7 @@ module WWW
       attr_reader :url, :delete_url
       attr_reader :id
       attr_reader :game
+      attr_reader :yours
 
       def initialize(agent, info, game, max_download = 5)
         @agent = agent
@@ -39,7 +40,9 @@ module WWW
         when /受付中/ : :accepted
         when /エンコード中/ : :encoding
         else
-          if info[:download_left].nil?
+          if info[:yours]
+            :yours
+          elsif info[:download_left].nil?
             :completed
           elsif info[:download_left] > 0
             :downloaded
@@ -56,7 +59,7 @@ module WWW
         @thumbnails = info[:thumbnails]
 
         @url = info[:url] || info[:purchase_url] 
-        @id = @url.scan(/u=(.*)/).to_s if @url
+        @id = Movie.url_to_id(@url) if @url
         @delete_url = info[:delete_url]
       end
 
@@ -69,7 +72,11 @@ module WWW
         when :completed
           download_completed(@url)
         when :downloaded
-          download_downloaded(@url)
+          if /download-conf.html/ =~ @url 
+            download_completed(@url)
+          else
+            download_downloaded(@url)
+          end
         else
           warn "Can't download this movie."
           return false
@@ -78,6 +85,10 @@ module WWW
 
       def downloadable?
         [:downloaded, :completed].include? @status
+      end
+
+      def self.url_to_id(url)
+        url.scan(/u=(.*)/).to_s
       end
 
       private
