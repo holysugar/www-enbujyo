@@ -12,7 +12,7 @@ module WWW
       attr_reader :title, :date, :result, :status
 
       # maybe nil
-      attr_reader :encoded_at, :requested_at, :bought_at
+      attr_reader :encoded_at, :requested_at, :bought_at, :published_at
       attr_reader :download_limit, :download_left
       attr_reader :thumbnail
       attr_reader :url, :delete_url
@@ -54,6 +54,7 @@ module WWW
         @encoded_at = info[:encoded_at]
         @requested_at = info[:requested_at]
         @bought_at = info[:bought_at]
+        @published_at = info[:published_at]
         @download_limit = info[:download_limit]
         @download_left = info[:download_left]
         @thumbnails = info[:thumbnails]
