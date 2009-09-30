@@ -16,6 +16,7 @@ require 'www/enbujyo/location'
 require 'www/enbujyo/game'
 require 'www/enbujyo/my_movie'
 require 'www/enbujyo/team_movie'
+require 'www/enbujyo/selection'
 
 #
 # SEGA の三国志大戦公式サイトへアクセスするライブラリ.
@@ -93,19 +94,20 @@ module WWW
       Player.new(player)
     end
 
-    def get_selection_info
-      page = @agent.post('http://enbujyo.3594t.com/members/selection/selection.cgi', {
-        'mode' => 'latest',
-        'version' => 1
-      })
-      Game.parse(page.body)
+    # NOTE: datestr is 'YYYYMMDD'...
+    def get_selection_info(mode = :latest, date = nil) 
+      sel = Selection.new(@agent, mode)
+      sel.get_information(:date => date)
     end
 
-    def download_selection(movie_type = 's')
-      movie_date = (Time.now - 60*60*17).strftime("%Y%m%d")  # 17時で切り替え/JST前提
-      @agent.auth_get 'http://enbujyo.3594t.com/members/selection/index.html'
-
-      download_movie(@agent, "http://download.enbujyo.3594t.com/selection_download.cgi?date=#{movie_date}&type=#{movie_type}")
+    def download_selection(mode, movie_type = 's', date = nil)
+      #date ||= (Time.now - 60*60*17).strftime("%Y%m%d")  # 17時で切り替え/JST前提
+      #movie_date = Selection.date_to_query(date)
+      #movie_type = Movie.movietype_query(movie_type)
+      #@agent.auth_get 'http://enbujyo.3594t.com/members/selection/index.html'
+      #download_movie(@agent, "http://download.enbujyo.3594t.com/selection_download.cgi?date=#{movie_date}&type=#{movie_type}")
+      sel = Selection.new(@agent, mode)
+      sel.download(movie_type, date, force = true)
     end
 
     def my_movies

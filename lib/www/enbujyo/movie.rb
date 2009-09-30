@@ -115,6 +115,23 @@ module WWW
           false
         end
       end
+
+      def self.movietype_query(movietype)
+        case movietype
+        when 0, '0', :normal_normal, :nn 
+          '0'
+        when 1, '1', :normal_reverse, :nr
+          '1'
+        when 2, '2', :fixed_normal, :fn
+          '2'
+        when 3, '3', :fixed_reverse, :fr
+          '3'
+        when 's', :small
+          's'
+        else
+          raise ArgumentError, "MovieType #{movietype} is not valid."
+        end
+      end
     end
   end
 end

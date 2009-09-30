@@ -14,7 +14,9 @@ module WWW
         slots_status = page.search('div[@class="st_block_info2_body"] a')
 
         movies_info_html = page.search('div.st_movie_info')
-        movies_info = movies_info_html.collect do |div|
+        movies_info = movies_info_html.select{|div|
+          div.search('div.st_movie_info_empty_image').empty?
+        }.collect{|div|
           info = {}
           info[:title] = div.search('div.st_movie_info_desc_battle_vs').text
           date = div.search('div.st_movie_info_desc_battle_date span')
@@ -58,7 +60,7 @@ module WWW
 
           game = Game.parse_replay(@agent, id)
           Movie.new(@agent, info, game)
-        end
+        }
         movies_info
       end
 

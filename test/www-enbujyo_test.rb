@@ -29,7 +29,44 @@ class WwwEnbujyoTest < Test::Unit::TestCase
     context "get_selection_info method" do
       should "return valid game data" do
         @agent.login
-        game = @agent.get_selection_info
+        game = @agent.get_selection_info[0]
+        assert game.player0.is_a? WWW::Enbujyo::Player
+        assert game.player1.is_a? WWW::Enbujyo::Player
+        assert game.deck0.is_a? WWW::Enbujyo::Deck
+        assert game.deck1.is_a? WWW::Enbujyo::Deck
+        assert game.location0.is_a? WWW::Enbujyo::Location
+        assert game.location1.is_a? WWW::Enbujyo::Location
+      end
+
+      should "return special valid game data" do
+        @agent.login
+        game = @agent.get_selection_info(:feature)[0]
+        assert game.player0.is_a? WWW::Enbujyo::Player
+        assert game.player1.is_a? WWW::Enbujyo::Player
+        assert game.deck0.is_a? WWW::Enbujyo::Deck
+        assert game.deck1.is_a? WWW::Enbujyo::Deck
+        assert game.location0.is_a? WWW::Enbujyo::Location
+        assert game.location1.is_a? WWW::Enbujyo::Location
+      end
+
+      should "return valid archive game data" do
+        @agent.login
+        games = @agent.get_selection_info(:archive)
+        assert_operator(10, :<, games.length) # usually 30
+        game = games[0]
+        assert game.player0.is_a? WWW::Enbujyo::Player
+        assert game.player1.is_a? WWW::Enbujyo::Player
+        assert game.deck0.is_a? WWW::Enbujyo::Deck
+        assert game.deck1.is_a? WWW::Enbujyo::Deck
+        assert game.location0.is_a? WWW::Enbujyo::Location
+        assert game.location1.is_a? WWW::Enbujyo::Location
+      end
+
+      should "return valid archive game data in a day" do
+        @agent.login
+        games = @agent.get_selection_info(:archive, 3.days.ago.to_date)
+        game = games[0]
+        assert_equal(3.days.ago.to_date, game.publish_date)
         assert game.player0.is_a? WWW::Enbujyo::Player
         assert game.player1.is_a? WWW::Enbujyo::Player
         assert game.deck0.is_a? WWW::Enbujyo::Deck
@@ -43,7 +80,7 @@ class WwwEnbujyoTest < Test::Unit::TestCase
       should "return my movie information list" do
         @agent.login
         movies = @agent.my_movies
-        assert movies.length >= 5
+        assert_operator(5, :>=, movies.length)
       end
     end
 

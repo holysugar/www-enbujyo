@@ -7,8 +7,8 @@ module WWW
   class Enbujyo
     class Game
       attr_reader :player0, :deck0, :location0, :player1, :deck1, :location1,
-        :date, :movie_date
-      attr_reader :id
+        :date, :movie_date, :publish_date
+      attr_reader :id, :options
 
       def initialize(p0, p0deck, p0loc, p1, p1deck, p1loc, options = {})
         @player0 = p0
@@ -20,6 +20,7 @@ module WWW
 
         @date = Time.parse(options['date']) if options['date']
         @movie_date = Date.parse(options['movie_date']) if options['movie_date']
+        @publish_date = Date.parse(options['publish_date']) if options['publish_date']
         case options[:p0result]
         when 'lose'
           @winner = 1
@@ -28,6 +29,8 @@ module WWW
         end
 
         @id = options[:id]
+
+        @options = options
       end
 
       def to_s
@@ -45,7 +48,7 @@ module WWW
       def self.parse_replay(agent, id)
         url = "http://enbujyo.3594t.com/members/replay.cgi?u=#{id}"
         gamedata = agent.get(url).body
-        parse(gamedata, id)
+        parse(gamedata, id)[0]
       end
 
       def self.parse(gamedata, id = nil)
@@ -54,14 +57,15 @@ module WWW
           gamedata = JSON.parse(json)
         end
 
-        rep = gamedata['replay'][0]
+        game = gamedata['replay'].collect{|rep|
 
-        rep[:id] = id if id
+          rep[:id] = id if id
 
-        p0, p0deck, p0loc = _parse_player_data('p0', rep)
-        p1, p1deck, p1loc = _parse_player_data('p1', rep)
+          p0, p0deck, p0loc = _parse_player_data('p0', rep)
+          p1, p1deck, p1loc = _parse_player_data('p1', rep)
 
-        game = new(p0, p0deck, p0loc, p1, p1deck, p1loc, rep)
+          new(p0, p0deck, p0loc, p1, p1deck, p1loc, rep)
+        }
         game
       end
 

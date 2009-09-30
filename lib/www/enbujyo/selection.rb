@@ -68,15 +68,10 @@ module WWW
             'version' => 1,
             'r' => rand,
           }
-          @agent.get @url
+          @agent.get @url # referer
           opt['feature'] = date if @mode == :feature
-          optstr = "?date=#{date}&mode=purchase&type=#{movie_type}&version=1"
-          optstr += "&feature=#{date}" if @mode == :feature
-          puts "Purchase movie at #{@cgiurl}?#{optstr}"
-          p opt
-          #@agent.get(@cgiurl + "?" + optstr)
+          puts "Purchase movie at #{@cgiurl}: #{opt}"
           @agent.post(@cgiurl, opt)
-          
        end
         if @mode == :feature
           downloadurl += "&content=feature&loc=/feature/"

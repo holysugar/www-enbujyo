@@ -8,7 +8,7 @@ module WWW
 
       def initialize(attr)
         @name         = attr[:name]
-        @name_image_url = 'http://enbujyo.3594t.com' + attr[:name_image_url]
+        @name_image_url = 'http://enbujyo.3594t.com' + attr[:name_image_url] rescue ''
         @accesscode   = attr[:accesscode]
         @team       = attr[:team]
 

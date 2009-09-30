@@ -1,8 +1,10 @@
 module WWW
   class Enbujyo
     module ExtendedAgent
+      def baseurl
+        URI.parse('http://enbujyo.3594t.com/')
+      end
       def auth_get(url)
-        baseurl = URI.parse('http://enbujyo.3594t.com/')
         url = (baseurl + url).to_s
         ret = get(url)
         if /error/i =~ page.uri.to_s or /エラー/ =~ page.title 
@@ -60,7 +62,7 @@ module WWW
       end
 
       def hack_json(jsonstr)
-        jsonstr.sub(/^\w+=/,'').gsub(/\},.*\]/m, '}]')
+        jsonstr.sub(/^\w+=/,'').gsub(/\},[^\{]*\]/m, '}]')
       end
       
       CH_NUMBER_TABLE = {
